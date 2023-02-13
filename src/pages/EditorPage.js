@@ -10,6 +10,7 @@ import {
     Navigate,
     useParams,
 } from 'react-router-dom';
+import './EditorPage.css'
 
 const EditorPage = () => {
     const socketRef = useRef(null);
@@ -19,7 +20,25 @@ const EditorPage = () => {
     const reactNavigator = useNavigate();
     const [clients, setClients] = useState([]);
 
+    document.getElementById("c").hidden = true;
+
     useEffect(() => {
+        const resizer = document.querySelector("#resizer");
+        const sidebar = document.querySelector("#sidebar");
+
+        resizer.addEventListener("mousedown", (event) => {
+            document.addEventListener("mousemove", resize, false);
+            document.addEventListener("mouseup", () => {
+                document.removeEventListener("mousemove", resize, false);
+            }, false);
+        });
+
+        function resize(e) {
+            const size = `${e.x}px`;
+            sidebar.style.flexBasis = size;
+        }
+
+        sidebar.style.flexBasis = '220px';
         const init = async () => {
             socketRef.current = await initSocket();
             socketRef.current.on('connect_error', (err) => handleErrors(err));
@@ -92,41 +111,41 @@ const EditorPage = () => {
     }
 
     return (
-        <div className="mainWrap">
-            <div className="aside">
-                <div className="asideInner">
-                    <div className="logo">
-                        <img
-                            className="logoImage"
-                            src="/code-sync.png"
-                            alt="logo"
-                        />
-                    </div>
-                    <h3>Connected</h3>
-                    <div className="clientsList">
-                        {clients.map((client) => (
-                            <Client
-                                key={client.socketId}
-                                username={client.username}
+        <div id="wrapper">
+            <div id="container">
+                <div id="sidebar">
+                    <div className="asideInner">
+                        <div className="logo">
+                            <img
+                                className="logoImage"
+                                src="/code-sync.png"
+                                alt="logo"
+                                style={{ width: '100%' }}
                             />
-                        ))}
+                        </div>
+                        <h4>Connected</h4>
+                        <div className="clientsList">
+                            {clients.map((client) => (
+                                <Client
+                                    key={client.socketId}
+                                    username={client.username}
+                                />
+                            ))}
+                        </div>
                     </div>
+                    <button type="button" onClick={copyRoomId} class="btn btn-light my-3">copy roomID</button>
+                    <button type="button" onClick={leaveRoom} class="btn btn-danger">Leave</button>
                 </div>
-                <button className="btn copyBtn" onClick={copyRoomId}>
-                    Copy ROOM ID
-                </button>
-                <button className="btn leaveBtn" onClick={leaveRoom}>
-                    Leave
-                </button>
-            </div>
-            <div className="editorWrap">
-                <Editor
-                    socketRef={socketRef}
-                    roomId={roomId}
-                    onCodeChange={(code) => {
-                        codeRef.current = code;
-                    }}
-                />
+                <div id="resizer"></div>
+                <div id="main">
+                    <Editor
+                        socketRef={socketRef}
+                        roomId={roomId}
+                        onCodeChange={(code) => {
+                            codeRef.current = code;
+                        }}
+                    />
+                </div>
             </div>
         </div>
     );

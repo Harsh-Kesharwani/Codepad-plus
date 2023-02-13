@@ -4,15 +4,15 @@
     justify-content: center;
     color: #fff;
     height: 100vh;
+    width: 100vw;
 }
 
 .formWrapper {
-    background: #2d303c;
+    background: #2f323d;
     padding: 20px;
     border-radius: 10px;
-    width: 400px;
-    max-width: 90%;
 }
+
 
 footer {
     position: fixed;
@@ -34,7 +34,7 @@ footer a {
 }
 
 .homePageLogo {
-    height: 131px;
+    height: 13.5vh;
     margin-bottom: 30px;
 }
 
@@ -57,18 +57,6 @@ footer a {
     font-weight: bold;
     cursor: pointer;
     transition: all 0.3s ease-in-out;
-}
-
-.joinBtn,
-.leaveBtn {
-    background: #4aed88;
-    width: 100px;
-    margin-left: auto;
-}
-
-.joinBtn:hover,
-.leaveBtn:hover {
-    background: #2b824c;
 }
 
 .createInfo {
@@ -95,12 +83,17 @@ footer a:hover {
 }
 
 .aside {
-    background: #1c1e29;
+    border-right:1px solid white;
+    background: #373842;
     padding: 16px;
     color: #fff;
     display: flex;
     flex-direction: column;
+    height: 100vh;
+    min-width: 100px;
+    max-width: 250px;
 }
+
 .asideInner {
     flex: 1;
 }
@@ -123,7 +116,7 @@ footer a:hover {
 }
 
 .logo {
-    border-bottom: 1px solid #424242;
+    border-bottom: 1px solid #524e4e;
     padding-bottom: 10px;
 }
 
@@ -131,10 +124,6 @@ footer a:hover {
     height: 60px;
 }
 
-.leaveBtn {
-    width: 100%;
-    margin-top: 20px;
-}
 .CodeMirror {
     min-height: calc(100vh - 20px);
     font-size: 20px;
@@ -145,3 +134,4 @@ footer a:hover {
 .Navbar{
     background-color: #fff;
 }
+
