@@ -30,13 +30,13 @@
     "web-vitals": "^2.1.4"
   },
   "scripts": {
-    "start:front": "react-app-rewired start",
+    "start:front": "react-scripts start",
     "start": "npm run build && npm run server:prod",
-    "build": "react-app-rewired build",
+    "build": "react-scripts build",
     "server:dev": "nodemon server.js",
     "server:prod": "node server.js",
-    "test": "react-app-rewired test",
-    "eject": "react-app-rewired eject"
+    "test": "react-scripts test",
+    "eject": "react-scripts eject"
   },
   "eslintConfig": {
     "extends": [
@@ -64,7 +64,7 @@
     "nodemon": "^2.0.15",
     "os-browserify": "^0.3.0",
     "process": "^0.11.10",
-    "react-app-rewired": "^2.2.1",
+    "react-scripts": "^2.2.1",
     "stream-browserify": "^3.0.0",
     "stream-http": "^3.2.0",
     "url": "^0.11.0"
