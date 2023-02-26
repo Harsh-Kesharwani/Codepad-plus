@@ -19,6 +19,16 @@ const EditorPage = () => {
     const { roomId } = useParams();
     const reactNavigator = useNavigate();
     const [clients, setClients] = useState([]);
+    const [ stream, setStream ] = useState();
+    const myVideo = useRef();
+
+    // useEffect(()=>{
+    //     navigator.mediaDevices.getUserMedia({ video: true, audio: true }).then((stream) => {
+	// 		setStream(stream)
+	// 		myVideo.current.srcObject = stream
+    //         console.log(stream);
+	// 	})
+    // },[]);
 
     document.getElementById("c").hidden = true;
 
@@ -53,6 +63,7 @@ const EditorPage = () => {
             socketRef.current.emit(ACTIONS.JOIN, {
                 roomId,
                 username: location.state?.username,
+                // stream: stream
             });
 
             // Listening for joined event
@@ -127,6 +138,8 @@ const EditorPage = () => {
                         <div className="clientsList">
                             {clients.map((client) => (
                                 <Client
+                                    socketRef={socketRef}
+                                    roomId={roomId}
                                     key={client.socketId}
                                     username={client.username}
                                 />

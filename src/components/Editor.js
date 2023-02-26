@@ -1,3 +1,4 @@
+/* eslint-disable no-unused-expressions */
 import React, { useEffect, useRef, useState } from 'react';
 import Select from "react-select";
 import monacoThemes from "monaco-themes/themes/themelist";
@@ -21,13 +22,13 @@ const javascriptDefault = ``;
 
 const Editor = ({ socketRef, roomId, onCodeChange }) => {
   const editorRef = useRef(null);
-  const [language, setLanguage] = useState(languages[0]);
+  const [language, setLanguage] = useState({});
   const [code, setCode] = useState(javascriptDefault);
   const [customInput, setCustomInput] = useState('');
   const [processing, setProcessing] = useState(null);
   const [outputDetails, setOutputDetails] = useState(null);
   const [theme, setTheme] = useState({label: 'Dracula', value: 'dracula', key: 'dracula'});
-  
+
   useEffect(() => {
     async function init() {
       editorRef.current = Codemirror.fromTextArea(
@@ -40,7 +41,6 @@ const Editor = ({ socketRef, roomId, onCodeChange }) => {
           lineNumbers: true,
         }
       );
-
       editorRef.current.on('change', (instance, changes) => {
         const { origin } = changes;
         const code = instance.getValue();
@@ -82,21 +82,50 @@ const Editor = ({ socketRef, roomId, onCodeChange }) => {
           setCode(code); // added
         }
       });
+      socketRef.current.on(ACTIONS.SET_OUTPUT, ({ details })=>{
+          setOutputDetails(()=>{return ({ ...details })});
+      });
+      
+      socketRef.current.on(ACTIONS.SET_LANGUAGE,({ lang })=>{
+          // console.log(typeof lang);
+          // console.log('lang',lang);
+          setLanguage(()=>{return ({...lang})});
+          // console.log('lang',lang);
+          // customOnSelectChange(lang);
+      });
+      socketRef.current.on(ACTIONS.CUSTOM_INPUT,({ input })=>{
+          console.log(typeof (input));
+          console.log('input',input);
+          setCustomInput(input);
+          console.log(input);
+      })
     }
 
     return () => {
       socketRef.current.off(ACTIONS.CODE_CHANGE);
+      socketRef.current.off(ACTIONS.SET_OUTPUT);
+      socketRef.current.off(ACTIONS.SET_LANGUAGE);
+      socketRef.current.off(ACTIONS.CUSTOM_INPUT);
     };
   }, [socketRef.current]);
-  
+
+  // useEffect(()=>{
+  //   console.log('server',language);
+  // },[language])
+
+  // useEffect(()=>{
+  //    console.log('custom Ip',customInput);
+  // },[customInput])
+
   const onSelectChange = (sl) => {
-    console.log("selected Option...", sl);
+    // console.log("selected Option...", sl);
     setLanguage(sl);
+    socketRef.current.emit(ACTIONS.LANGUAGE,({roomId: roomId,language:sl}));
   };
 
-  function handleThemeChange(th) {
-    console.log(th);
-  }
+  // function handleThemeChange(th) {
+  //   console.log(th);
+  // }
 
   const checkStatus = async (token) => {
     const options = {
@@ -122,6 +151,9 @@ const Editor = ({ socketRef, roomId, onCodeChange }) => {
       } else {
         setProcessing(false)
         setOutputDetails(response.data)
+        
+        socketRef.current.emit(ACTIONS.OUTPUT,{roomId: roomId,details: response.data});
+        
         toast.success(`Compiled Successfully!`)
         console.log('response.data', response.data)
         return
@@ -134,8 +166,21 @@ const Editor = ({ socketRef, roomId, onCodeChange }) => {
   };
 
   const handleCompile = () => {
+    var c=0;
     if(!language.id){
       toast.error('Please Select Language');
+      return ;
+    }
+    for(var i=0;i<code.length;i++){
+      if(code[i]!==` ` && code[i]!=='\n'){
+        break;
+      }
+      else{
+        c++;
+      }
+    }
+    if(c===code.length || code===``){
+      toast.error('Please Enter Your Code');
       return ;
     }
     setProcessing(true);
@@ -172,7 +217,8 @@ const Editor = ({ socketRef, roomId, onCodeChange }) => {
       });
   };
   function setinput(event){
-    setCustomInput(event.target.value)
+    setCustomInput(event.target.value);
+    socketRef.current.emit(ACTIONS.CUSTOM_INPUT,{roomId, input : event.target.value});
   }
 
   return (
@@ -186,11 +232,14 @@ const Editor = ({ socketRef, roomId, onCodeChange }) => {
                   <Select
                     placeholder={`Select Language`}
                     options={languages}
-                    defaultValue={language.name}
+                    // defaultValue={language.name}
+                    value={languages.filter(function(mylang) {
+                      return language.name === mylang.name;
+                    })}
                     onChange={(selectedOption) => onSelectChange(selectedOption)}
                   />
                 </div>
-                <div class="collapse navbar-collapse border border-primary mx-5">
+                {/* <div class="collapse navbar-collapse border border-primary mx-5">
                   <Select
                     placeholder={`Change Theme`}
                     options={Object.entries(monacoThemes).map(([themeId, themeName]) => ({
@@ -200,7 +249,7 @@ const Editor = ({ socketRef, roomId, onCodeChange }) => {
                     }))}
                     onChange={handleThemeChange}
                   />
-                </div>
+                </div> */}
                 <div className='mx-5'>
                   <button type="button" onClick={handleCompile} className={processing ? "btn btn-success" : "btn btn-primary"}>{processing ? "Processing..." : "Compile and Execute"}</button>
                 </div>
@@ -220,7 +269,7 @@ const Editor = ({ socketRef, roomId, onCodeChange }) => {
               </div> 
             </div>
               <div class="form-outline">
-                <textarea class="form-control" onChange={setinput} id="textAreaExample" rows="4" placeholder='Enter input...' style={{height:'20vh'}}></textarea>
+                <textarea class="form-control" onChange={setinput} id="textAreaExample" value={customInput} rows="4" placeholder='Enter input...' style={{height:'22vh'}}></textarea>
                 <label class="form-label" for="textAreaExample">Custom Input</label>
               </div>
               <br></br>

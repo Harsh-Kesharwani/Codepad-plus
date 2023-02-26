@@ -17,6 +17,7 @@
     "express": "^4.17.3",
     "monaco-themes": "^0.4.3",
     "react": "^17.0.2",
+    "react-app-rewired": "^2.2.1",
     "react-avatar": "^4.0.0",
     "react-avatar-editor": "^13.0.0",
     "react-dom": "^17.0.2",
@@ -24,19 +25,20 @@
     "react-router-dom": "^6.2.1",
     "react-scripts": "5.0.0",
     "react-select": "^5.7.0",
+    "simple-peer": "^9.11.1",
     "socket.io": "^4.4.1",
     "socket.io-client": "^4.4.1",
     "uuid": "^8.3.2",
     "web-vitals": "^2.1.4"
   },
   "scripts": {
-    "start:front": "react-scripts start",
+    "start:front": "react-app-rewired start",
     "start": "npm run build && npm run server:prod",
-    "build": "react-scripts build",
+    "build": "react-app-rewired build",
     "server:dev": "nodemon server.js",
     "server:prod": "node server.js",
-    "test": "react-scripts test",
-    "eject": "react-scripts eject"
+    "test": "react-app-rewired test",
+    "eject": "react-app-rewired eject"
   },
   "eslintConfig": {
     "extends": [
@@ -64,7 +66,7 @@
     "nodemon": "^2.0.15",
     "os-browserify": "^0.3.0",
     "process": "^0.11.10",
-    "react-scripts": "^2.2.1",
+    "react-scripts": "^5.0.0",
     "stream-browserify": "^3.0.0",
     "stream-http": "^3.2.0",
     "url": "^0.11.0"

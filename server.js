@@ -14,6 +14,7 @@ app.use((req, res, next) => {
 });
 
 const userSocketMap = {};
+const streamMap={};
 function getAllConnectedClients(roomId) {
     // Map
     return Array.from(io.sockets.adapter.rooms.get(roomId) || []).map(
@@ -21,6 +22,7 @@ function getAllConnectedClients(roomId) {
             return {
                 socketId,
                 username: userSocketMap[socketId],
+                stream: streamMap[socketId],
             };
         }
     );
@@ -49,7 +51,18 @@ io.on('connection', (socket) => {
     socket.on(ACTIONS.SYNC_CODE, ({ socketId, code }) => {
         io.to(socketId).emit(ACTIONS.CODE_CHANGE, { code });
     });
+     
+    socket.on(ACTIONS.OUTPUT,({ roomId, details})=>{
+        socket.in(roomId).emit(ACTIONS.SET_OUTPUT, { details: details });
+    });
 
+    socket.on(ACTIONS.LANGUAGE,({ roomId, language })=>{
+        socket.in(roomId).emit(ACTIONS.SET_LANGUAGE,{ lang: language });
+    });
+
+    socket.on(ACTIONS.CUSTOM_INPUT,({ roomId, input})=>{
+        socket.in(roomId).emit(ACTIONS.CUSTOM_INPUT,{input: input});
+    });
     socket.on('disconnecting', () => {
         const rooms = [...socket.rooms];
         rooms.forEach((roomId) => {
@@ -61,6 +74,7 @@ io.on('connection', (socket) => {
         delete userSocketMap[socket.id];
         socket.leave();
     });
+
 });
 
 const PORT = process.env.PORT || 5000;
