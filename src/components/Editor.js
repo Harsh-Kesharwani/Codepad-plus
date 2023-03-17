@@ -172,7 +172,7 @@ const Editor = ({ socketRef, roomId, onCodeChange }) => {
       return ;
     }
     for(var i=0;i<code.length;i++){
-      if(code[i]!==` ` && code[i]!=='\n'){
+      if(code[i]!==` ` && code[i]!=='\n' && code[i]!='\t'){
         break;
       }
       else{
