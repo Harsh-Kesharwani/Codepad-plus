@@ -12,11 +12,12 @@ import ACTIONS from '../Actions';
 import { languages } from './subcomponents/languages';
 import axios from 'axios';
 import toast from "react-hot-toast";
-import btoa from 'btoa';
+// import btoa from 'btoa';
 import OutputDetails from './subcomponents/outputDetails';
 import OutputWindow from './subcomponents/outputWindow';
 import 'bootstrap/dist/css/bootstrap.css';
 import './Editor.css';
+import { stdin } from 'process';
 
 const javascriptDefault = ``;
 
@@ -94,10 +95,10 @@ const Editor = ({ socketRef, roomId, onCodeChange }) => {
           // customOnSelectChange(lang);
       });
       socketRef.current.on(ACTIONS.CUSTOM_INPUT,({ input })=>{
-          console.log(typeof (input));
-          console.log('input',input);
+          // console.log(typeof (input));
+          // console.log('input',input);
           setCustomInput(input);
-          console.log(input);
+          // console.log(input);
       })
     }
 
@@ -155,11 +156,11 @@ const Editor = ({ socketRef, roomId, onCodeChange }) => {
         socketRef.current.emit(ACTIONS.OUTPUT,{roomId: roomId,details: response.data});
         
         toast.success(`Compiled Successfully!`)
-        console.log('response.data', response.data)
+        // console.log('response.data', response.data)
         return
       }
     } catch (err) {
-      console.log("err", err);
+      // console.log("err", err);
       setProcessing(false);
       toast.err("compilation fails");
     }
@@ -172,7 +173,7 @@ const Editor = ({ socketRef, roomId, onCodeChange }) => {
       return ;
     }
     for(var i=0;i<code.length;i++){
-      if(code[i]!==` ` && code[i]!=='\n' && code[i]!='\t'){
+      if(code[i]!==` ` && code[i]!=='\n' && code[i]!=='\t'){
         break;
       }
       else{
@@ -187,8 +188,14 @@ const Editor = ({ socketRef, roomId, onCodeChange }) => {
     const formData = {
       language_id: language.id,
       // encode source code in base64
-      source_code: btoa(code),
-      stdin: btoa(customInput),
+      // source_code: btoa(code),
+      // stdin: btoa(customInput),
+      
+      // source_code : Buffer.from(code).toString('base64'),
+      // stdin : Buffer.from(customInput).toString('base64')
+      
+      source_code: window.btoa(code),
+      stdin: window.btoa(customInput),
     };
     const options = {
       method: "POST",
@@ -206,7 +213,7 @@ const Editor = ({ socketRef, roomId, onCodeChange }) => {
     axios
       .request(options)
       .then(function (response) {
-        console.log("res.data", response.data);
+        // console.log("res.data", response.data);
         const token = response.data.token;
         checkStatus(token);
       })
