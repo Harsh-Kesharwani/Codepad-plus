@@ -70,7 +70,7 @@ const Editor = ({ socketRef, roomId, onCodeChange }) => {
     });
 
     function resize(e) {
-      const size = `${1848-e.x}px`;
+      const size = `${window.innerWidth-e.x}px`;
       sidebar1.style.flexBasis = size;
     }
 
