@@ -6,7 +6,8 @@ import './Home.css';
 
 const Home = () => {
   const navigate = useNavigate();
-  var url="https://www.linkedin.com/in/harsh-kesharwani/";
+  // var url="https://www.linkedin.com/in/harsh-kesharwani/";
+  var url="https://www.linkedin.com/in/yash-maske-b8a746239";
   const [roomId, setRoomId] = useState("");
   const [username, setUsername] = useState("");
   const createNewRoom = (e) => {
@@ -75,7 +76,7 @@ const Home = () => {
         <div style={{fontSize:'22px'}}>
           Copyright &copy; Designed and Hosted by
           <a href={url} style={{textDecoration:"none"}}>
-          &nbsp;&nbsp; Harsh Kesharwani
+          &nbsp;&nbsp; Yash Maske
           </a>
         </div>
       </footer>
