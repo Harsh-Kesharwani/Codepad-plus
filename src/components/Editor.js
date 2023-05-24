@@ -22,13 +22,17 @@ import { stdin } from 'process';
 const javascriptDefault = ``;
 
 const Editor = ({ socketRef, roomId, onCodeChange }) => {
+  const [name, setName] = useState('');
+  const [email, setEmail] = useState('');
+  const [review, setReview] = useState('');
+  const [flag, setFlag] = useState(false);
   const editorRef = useRef(null);
   const [language, setLanguage] = useState({});
   const [code, setCode] = useState(javascriptDefault);
   const [customInput, setCustomInput] = useState('');
   const [processing, setProcessing] = useState(null);
   const [outputDetails, setOutputDetails] = useState(null);
-  const [theme, setTheme] = useState({label: 'Dracula', value: 'dracula', key: 'dracula'});
+  const [theme, setTheme] = useState({ label: 'Dracula', value: 'dracula', key: 'dracula' });
 
   useEffect(() => {
     async function init() {
@@ -70,7 +74,7 @@ const Editor = ({ socketRef, roomId, onCodeChange }) => {
     });
 
     function resize(e) {
-      const size = `${window.innerWidth-e.x}px`;
+      const size = `${window.innerWidth - e.x}px`;
       sidebar1.style.flexBasis = size;
     }
 
@@ -83,22 +87,22 @@ const Editor = ({ socketRef, roomId, onCodeChange }) => {
           setCode(code); // added
         }
       });
-      socketRef.current.on(ACTIONS.SET_OUTPUT, ({ details })=>{
-          setOutputDetails(()=>{return ({ ...details })});
+      socketRef.current.on(ACTIONS.SET_OUTPUT, ({ details }) => {
+        setOutputDetails(() => { return ({ ...details }) });
       });
-      
-      socketRef.current.on(ACTIONS.SET_LANGUAGE,({ lang })=>{
-          // console.log(typeof lang);
-          // console.log('lang',lang);
-          setLanguage(()=>{return ({...lang})});
-          // console.log('lang',lang);
-          // customOnSelectChange(lang);
+
+      socketRef.current.on(ACTIONS.SET_LANGUAGE, ({ lang }) => {
+        // console.log(typeof lang);
+        // console.log('lang',lang);
+        setLanguage(() => { return ({ ...lang }) });
+        // console.log('lang',lang);
+        // customOnSelectChange(lang);
       });
-      socketRef.current.on(ACTIONS.CUSTOM_INPUT,({ input })=>{
-          // console.log(typeof (input));
-          // console.log('input',input);
-          setCustomInput(input);
-          // console.log(input);
+      socketRef.current.on(ACTIONS.CUSTOM_INPUT, ({ input }) => {
+        // console.log(typeof (input));
+        // console.log('input',input);
+        setCustomInput(input);
+        // console.log(input);
       })
     }
 
@@ -121,7 +125,7 @@ const Editor = ({ socketRef, roomId, onCodeChange }) => {
   const onSelectChange = (sl) => {
     // console.log("selected Option...", sl);
     setLanguage(sl);
-    socketRef.current.emit(ACTIONS.LANGUAGE,({roomId: roomId,language:sl}));
+    socketRef.current.emit(ACTIONS.LANGUAGE, ({ roomId: roomId, language: sl }));
   };
 
   // function handleThemeChange(th) {
@@ -152,9 +156,9 @@ const Editor = ({ socketRef, roomId, onCodeChange }) => {
       } else {
         setProcessing(false)
         setOutputDetails(response.data)
-        
-        socketRef.current.emit(ACTIONS.OUTPUT,{roomId: roomId,details: response.data});
-        
+
+        socketRef.current.emit(ACTIONS.OUTPUT, { roomId: roomId, details: response.data });
+
         toast.success(`Compiled Successfully!`)
         // console.log('response.data', response.data)
         return
@@ -167,22 +171,22 @@ const Editor = ({ socketRef, roomId, onCodeChange }) => {
   };
 
   const handleCompile = () => {
-    var c=0;
-    if(!language.id){
+    var c = 0;
+    if (!language.id) {
       toast.error('Please Select Language');
-      return ;
+      return;
     }
-    for(var i=0;i<code.length;i++){
-      if(code[i]!==` ` && code[i]!=='\n' && code[i]!=='\t'){
+    for (var i = 0; i < code.length; i++) {
+      if (code[i] !== ` ` && code[i] !== '\n' && code[i] !== '\t') {
         break;
       }
-      else{
+      else {
         c++;
       }
     }
-    if(c===code.length || code===``){
+    if (c === code.length || code === ``) {
       toast.error('Please Enter Your Code');
-      return ;
+      return;
     }
     setProcessing(true);
     const formData = {
@@ -190,10 +194,10 @@ const Editor = ({ socketRef, roomId, onCodeChange }) => {
       // encode source code in base64
       // source_code: btoa(code),
       // stdin: btoa(customInput),
-      
+
       // source_code : Buffer.from(code).toString('base64'),
       // stdin : Buffer.from(customInput).toString('base64')
-      
+
       source_code: window.btoa(code),
       stdin: window.btoa(customInput),
     };
@@ -214,7 +218,7 @@ const Editor = ({ socketRef, roomId, onCodeChange }) => {
       .request(options)
       .then(function (response) {
         // console.log("res.data", response.data);
-        const token = response.data.token;
+        const token = response?.data?.token;
         checkStatus(token);
       })
       .catch((err) => {
@@ -223,10 +227,40 @@ const Editor = ({ socketRef, roomId, onCodeChange }) => {
         console.log(error);
       });
   };
-  function setinput(event){
+
+  function setinput(event) {
     setCustomInput(event.target.value);
-    socketRef.current.emit(ACTIONS.CUSTOM_INPUT,{roomId, input : event.target.value});
+    socketRef.current.emit(ACTIONS.CUSTOM_INPUT, { roomId, input: event.target.value });
   }
+
+  const handleSubmit = (event) => {
+    event.preventDefault(); // Prevent the default form submission
+
+    // Prepare data for API request
+    const data = {
+      name: name,
+      email: email,
+      review: review
+    };
+    console.log(data);
+    // Clear the form after successful submission
+    setName('');
+    setEmail('');
+    setReview('');
+    toast.success('Feedback submitted successfully!');
+    setFlag(()=>true);
+    // Make AJAX request to the API endpoint using Axios
+    axios.post('http://127.0.0.1:7000/submit-feedback', data)
+      .then((response) => {
+        // API request successful, do something with the response
+        console.log(response.data);
+      })
+      .catch((error) => {
+        // API request failed
+        console.error(error);
+        // toast.error('Failed to submit feedback. Please try again.');
+      });
+  };
 
   return (
     <div id="wrapper">
@@ -240,7 +274,7 @@ const Editor = ({ socketRef, roomId, onCodeChange }) => {
                     placeholder={`Select Language`}
                     options={languages}
                     // defaultValue={language.name}
-                    value={languages.filter(function(mylang) {
+                    value={languages.filter(function (mylang) {
                       return language.name === mylang.name;
                     })}
                     onChange={(selectedOption) => onSelectChange(selectedOption)}
@@ -272,18 +306,39 @@ const Editor = ({ socketRef, roomId, onCodeChange }) => {
           <div>
             <div className="right-container flex flex-shrink-0 w-[30%] flex-col">
               <div className='container'>
-                <OutputWindow outputDetails={outputDetails}/> 
-              </div> 
+                <OutputWindow outputDetails={outputDetails} />
+              </div>
             </div>
-              <div class="form-outline">
-                <textarea class="form-control" onChange={setinput} id="textAreaExample" value={customInput} rows="4" placeholder='Enter input...' style={{height:'22vh'}}></textarea>
-                <label class="form-label" for="textAreaExample">Custom Input</label>
-              </div>
-              <br></br>
-              <div>
-                  {outputDetails && <OutputDetails outputDetails={outputDetails} />}
-              </div>
+            <div class="form-outline">
+              <textarea class="form-control" onChange={setinput} id="textAreaExample" value={customInput} rows="4" placeholder='Enter input...' style={{ height: '22vh' }}></textarea>
+              <label class="form-label" for="textAreaExample">Custom Input</label>
+            </div>
+            <br></br>
+            <div>
+              {outputDetails && <OutputDetails outputDetails={outputDetails} />}
+            </div>
           </div>
+          <hr></hr>
+
+    <form onSubmit={handleSubmit}>
+      <div className="form-group">
+        <label htmlFor="name">Name:</label>
+        <input type="text" placeholder='Name' className="form-control" id="name" value={name} onChange={(event) => setName(event.target.value)} required />
+      </div>
+
+      <div className="form-group">
+        <label htmlFor="email">Email:</label>
+        <input type="email" placeholder='Email' className="form-control" id="email" value={email} onChange={(event) => setEmail(event.target.value)} required />
+      </div>
+
+      <div className="form-group">
+        <label htmlFor="review">Review or Feedback:</label>
+        <textarea placeholder='Feedback...' className="form-control" id="review" value={review} onChange={(event) => setReview(event.target.value)} required />
+      </div>
+      <br></br>
+      <button type="submit" disabled={flag} className="btn btn-primary">Submit</button>
+    </form>
+
         </div>
       </div>
     </div>
