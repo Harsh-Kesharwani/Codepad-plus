@@ -242,7 +242,6 @@ const Editor = ({ socketRef, roomId, onCodeChange }) => {
       email: email,
       review: review
     };
-    console.log(data);
     // Clear the form after successful submission
     setName('');
     setEmail('');
@@ -250,7 +249,11 @@ const Editor = ({ socketRef, roomId, onCodeChange }) => {
     toast.success('Feedback submitted successfully!');
     setFlag(()=>true);
     // Make AJAX request to the API endpoint using Axios
-    axios.post('http://127.0.0.1:7000/submit-feedback', data)
+    axios.post('/generate-content',  {
+          name: name,
+          email: email,
+          review: review
+    })
       .then((response) => {
         // API request successful, do something with the response
         console.log(response.data);

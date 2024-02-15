@@ -4,9 +4,95 @@ const http = require('http');
 const path = require('path');
 const { Server } = require('socket.io');
 const ACTIONS = require('./src/Actions');
+const axios = require('axios');
+const nodemailer = require('nodemailer')
 
 const server = http.createServer(app);
 const io = new Server(server);
+
+require('dotenv').config();
+
+app.use(express.json());
+
+function getPrompt(name, email, review) {
+    const prompt = `
+        You are a customer service AI assistant.
+        Your task is to send an email reply to a valued customer ${name} whose email id is ${email}.
+        Given the customer email delimited by triple backticks, \
+        Generate a reply to thank the customer for their review.
+        If the review is positive or neutral, thank them for \
+        their review.
+        If the review is negative, apologize and suggest that \
+        they can reach out to customer service. 
+        Make sure to use specific details from the review.
+        Write in a concise and professional tone.
+        Sign the email as 'AI customer agent'.
+
+        Format email in standard format.
+
+        Customer review: \`\`\`${review}\`\`\`
+        `;
+    return prompt;
+}
+
+app.post('/generate-content', (req, res) => {
+    try {
+      const { name, email, review } = req.body;
+      // Make a POST request to the Google Cloud Natural Language API
+     axios.post('https://generativelanguage.googleapis.com/v1beta/models/gemini-pro:generateContent',
+      {
+        "contents": [
+          {
+            "parts": [
+              {
+                "text": getPrompt(name, email, review)
+              }
+            ]
+          }
+        ]
+      },
+      {
+        params: {
+          key: process.env.GEMINI_API_KEY
+        },
+        headers: {
+          'Content-Type': 'application/json'
+        }
+      })
+      .then((response) => {
+        const llmResponse = response.data.candidates[0].content.parts[0].text;
+        // API request successful, do something with the response
+        const transporter = nodemailer.createTransport({
+          service: 'Gmail',
+          auth: {
+              user: process.env.EMAIL,
+              pass: process.env.EMAIL_PASSWORD
+          }
+        });
+
+        // Define email options
+        const mailOptions = {
+          from: process.env.EMAIL,
+          to: email,
+          subject: 'Thank You for Your Valuable Review',
+          text: llmResponse
+        };
+
+        // Send email
+        transporter.sendMail(mailOptions, (error, info) => {
+          if (error) {
+              console.error('Error sending email:', error);
+          } else {
+              console.log('Email sent:', info.response);
+          }
+        });
+      })
+    } catch (error) {
+      // If an error occurs during the request, send an error response to the client
+      console.error('Error:', error.response.data);
+      res.status(error.response.status).json({ error: 'An error occurred while processing your request.' });
+    }
+});
 
 app.use(express.static('build'));
 app.use((req, res, next) => {
@@ -78,4 +164,6 @@ io.on('connection', (socket) => {
 });
 
 const PORT = process.env.PORT || 5000;
-server.listen(PORT, () => console.log(`Listening on port ${PORT}`));
+server.listen(PORT, () => {
+  console.log(`Listening on port ${PORT}`)
+});
