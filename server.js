@@ -53,7 +53,7 @@ app.post('/generate-content', (req, res) => {
       },
       {
         params: {
-          key: process.env.GEMINI_API_KEY
+          key: `${process.env.GEMINI_API_KEY}`
         },
         headers: {
           'Content-Type': 'application/json'
